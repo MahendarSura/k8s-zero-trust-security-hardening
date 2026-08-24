@@ -1,179 +1,199 @@
+# 🛡️ **Enterprise Kubernetes Security Architecture & Zero-Trust Defense**
+
 ```text
-╔══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-║                     🛡️  ENTERPRISE ZERO-TRUST KUBERNETES SECURITY ARCHITECTURE & SOC ENGINE                      ║
-║                           [ STATUS: 100% HARDENED • CIS / NIST / SOC 2 COMPLIANT ]                               ║
-╚══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+====================================================================================================
+ 🛡️  ENTERPRISE KUBERNETES SECURITY ARCHITECTURE & ZERO-TRUST DEFENSE
+====================================================================================================
 
-┌─────────────────────────────────────────────── SYSTEM METRICS ───────────────────────────────────────────────────┐
-│ • PLATFORM       : Amazon EKS Production Cluster (v1.31)     │ • ADMISSION  : Kyverno v1.12 + PSA Restricted     │
-│ • SECURITY MODEL : 5-Layer Defense-in-Depth Zero-Trust       │ • NETWORK    : Cilium eBPF + Transparent mTLS     │
-│ • SUPPLY CHAIN   : Trivy CVE Gate + Sigstore Cosign (KMS)    │ • RUNTIME    : Falco eBPF Kernel Threat Sensor    │
-└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+📌 Project Overview
+----------------------------------------------------------------------------------------------------
+Enterprise Kubernetes Security Architecture & Zero-Trust Defense is a production-grade cloud-native
+security framework demonstrating defense-in-depth across the entire software delivery and container
+runtime lifecycle.
 
-══════════════════════════════════════════ 1. END-TO-END SECURITY TOPOLOGY ═════════════════════════════════════════
+The security platform is designed around:
+ • 🔏 Supply Chain Security with Cosign cryptographic signing and verification
+ • 🔍 Vulnerability Management via Trivy automated build gates
+ • 🚪 Admission Control using Kyverno and Pod Security Admission (PSA Restricted)
+ • 🔒 Workload Hardening with Non-Root execution, dropped capabilities, and read-only filesystems
+ • 🌐 Zero-Trust Networking using Cilium eBPF L3/L4/L7 microsegmentation
+ • 🚨 Kernel-Level Runtime Detection powered by Falco eBPF syscall monitoring
+ • 🔑 Dynamic Secrets Management using External Secrets Operator and AWS KMS
+ • 👤 Least-Privilege Identity through AWS IAM Roles for Service Accounts (IRSA)
+ • 📊 Security Observability via Prometheus, Hubble, and FalcoSidekick alerting
+ • 🛡️ Continuous Compliance aligned with CIS Benchmarks, NIST SP 800-190, and SOC 2
 
-                     CI/CD PIPELINE (BUILD STAGE)
-                                  │
-                                  ▼
-                    ┌───────────────────────────┐
-                    │  Trivy Scan & Vulnerability│
-                    │         Gate (CVEs)       │
-                    └─────────────┬─────────────┘
-                                  │
-                                  ▼
-                    ┌───────────────────────────┐
-                    │ Cosign Cryptographic Sign │
-                    │   & Attestation to OCI    │
-                    └─────────────┬─────────────┘
-                                  │
-══════════════════════════════════╪════════════════════════════════════════════════════════════════════════════════
-                      KUBERNETES CONTROL PLANE
-                                  │
-                                  ▼
-                    ┌───────────────────────────┐
-                    │ Pod Security Admission    │
-                    │   (Restricted Profile)    │
-                    └─────────────┬─────────────┘
-                                  │
-                                  ▼
-                    ┌───────────────────────────┐
-                    │ Kyverno Dynamic Validating│
-                    │ & Mutating Webhooks       │
-                    └─────────────┬─────────────┘
-                                  │
-══════════════════════════════════╪════════════════════════════════════════════════════════════════════════════════
-                       DATA PLANE / RUNTIME
-                                  │
-                                  ▼
-        ┌───────────────────────────────────────────────────┐
-        │                 HARDENED POD RUNTIME              │
-        │  • runAsNonRoot: true     • drop: ["ALL"]         │
-        │  • readOnlyRootFilesystem • automountToken: false │
-        └─────────────────────────┬─────────────────────────┘
-                                  │
-                    ┌─────────────┴─────────────┐
-                    │                           │
-                    ▼                           ▼
-        ┌───────────────────────┐   ┌───────────────────────┐
-        │  CILIUM eBPF NETWORK  │   │   FALCO eBPF ENGINE   │
-        │ • Default-Deny Policy │   │ • Syscall Inspection  │
-        │ • L7 HTTP DNS Rules   │   │ • Terminal Shell Alert│
-        │ • Transparent mTLS    │   │ • MITRE Threat Audit  │
-        └───────────────────────┘   └───────────────────────┘
 
-══════════════════════════════════ 2. COMPREHENSIVE CONTROLS & ENFORCEMENT ═════════════════════════════════════════
+🏗️ Architecture
+----------------------------------------------------------------------------------------------------
+                         ┌─────────────────────┐
+                         │      DEVELOPER      │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │  GITHUB REPOSITORY  │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   GITHUB ACTIONS    │
+                         │    SECURITY CI      │
+                         └──────────┬──────────┘
+                                    │
+                  ┌─────────────────┼─────────────────┐
+                  │                 │                 │
+                  ▼                 ▼                 ▼
+             Trivy Scan       Checkov IaC       Cosign Sign
+             (Vulnerability)    (Terraform)      (Attestation)
+                  │                 │                 │
+                  └─────────────────┼─────────────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   CONTAINER REGISTRY│
+                         │     (Signed OCI)    │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │ ADMISSION CONTROLLER│
+                         │  PSA + Kyverno      │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+              ┌──────────────────────────────────────────┐
+              │             AMAZON EKS CLUSTER           │
+              │                                          │
+              │   ┌──────────────────────────────────┐   │
+              │   │      HARDENED WORKLOAD TIER      │   │
+              │   │   • runAsNonRoot: true           │   │
+              │   │   • capabilities.drop: ["ALL"]   │   │
+              │   │   • readOnlyRootFilesystem: true │   │
+              │   └─────────────────┬────────────────┘   │
+              │                     │                    │
+              │         ┌───────────┴───────────┐        │
+              │         ▼                       ▼        │
+              │   ┌───────────┐           ┌───────────┐  │
+              │   │  CILIUM   │           │   FALCO   │  │
+              │   │   eBPF    │           │  RUNTIME  │  │
+              │   │  NETWORK  │           │ DETECTION │  │
+              │   └─────┬─────┘           └─────┬─────┘  │
+              └─────────┼───────────────────────┼────────┘
+                        │                       │
+                        └───────────┬───────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │ SECURITY TELEMETRY  │
+                         │   FalcoSidekick     │
+                         │  + Alertmanager     │
+                         └──────────┬──────────┘
+                                    │
+                                    ▼
+                         ┌─────────────────────┐
+                         │   INCIDENT TRIAGE   │
+                         │  Slack / PagerDuty  │
+                         └─────────────────────┘
 
- ┌──────────────────┬───────────────────────────────┬─────────────────────────┬────────────────────────────────────┐
- │ SECURITY LAYER   │ CONTROL MECHANISM             │ TARGET ENGINE / TOOL    │ ENFORCEMENT METHOD                 │
- ├──────────────────┼───────────────────────────────┼─────────────────────────┼────────────────────────────────────┤
- │ 📦 SUPPLY CHAIN  │ Container Vulnerability Scan  │ Trivy Scanner           │ Auto-block CRITICAL/HIGH CVEs in CI│
- │ 🔏 SUPPLY CHAIN  │ Artifact Cryptographic Sign   │ Sigstore / Cosign (KMS) │ Rejects unsigned images at cluster │
- │ 🚪 ADMISSION     │ Pod Security Standards (PSS)  │ K8s PSA (Restricted)    │ Blocks privileged & host namespaces│
- │ 📜 ADMISSION     │ Declarative Policy-as-Code    │ Kyverno Policy Engine   │ Enforces non-root, labels, digests │
- │ 🔒 WORKLOAD      │ Least-Privilege Capabilities  │ Linux Security Context  │ drop: ["ALL"], no root escalation  │
- │ 👤 IDENTITY      │ Service Account Hardening     │ K8s IAM / AWS IRSA      │ automountServiceAccountToken: false│
- │ 🌐 NETWORK       │ Zero-Trust Microsegmentation  │ Cilium eBPF CNI         │ Default-Deny Ingress/Egress + DNS  │
- │ 🚨 RUNTIME       │ Kernel Syscall Threat Audit   │ Falco eBPF Driver       │ Real-time alerts on shell/writes   │
- │ 🔑 SECRETS       │ Ephemeral Secret Management   │ External Secrets / KMS  │ No base64/plaintext secrets in Git │
- └──────────────────┴───────────────────────────────┴─────────────────────────┴────────────────────────────────────┘
 
-══════════════════════════════════ 3. WORKLOAD HARDENING CONFIGURATION ════════════════════════════════════════════
+🧩 Architecture Components
+----------------------------------------------------------------------------------------------------
+ Layer                    Components
+ ───────────────────────  ──────────────────────────────────────────────────────────────────────────
+ 🔏 Supply Chain          Trivy, Sigstore / Cosign, AWS ECR
+ 🚪 Admission Control     Pod Security Admission (Restricted), Kyverno Policy Engine
+ 🔒 Workload Security     Non-Root UID/GID, Seccomp RuntimeDefault, Drop Capabilities, Read-Only FS
+ 🌐 Network Layer         Cilium CNI, eBPF Default-Deny Policies, L7 FQDN Filtering, WireGuard mTLS
+ 👤 Identity & Access     AWS IAM Roles for Service Accounts (IRSA), Kubernetes RBAC
+ 🚨 Runtime Security      Falco eBPF Syscall Monitor, FalcoSidekick
+ 🔑 Secrets Management    External Secrets Operator, AWS Secrets Manager, AWS KMS
+ 📊 Security Visibility   Hubble eBPF, Prometheus, Alertmanager, Grafana
+ 🧪 Continuous Audit      Automated Security Integration Tests, CIS Compliance Auditing
 
-  --- POD SECURITY CONTEXT MANIFEST (spec.template.spec) ---
 
-  securityContext:
-    runAsNonRoot: true
-    runAsUser: 10001
-    runAsGroup: 10001
-    fsGroup: 10001
-    seccompProfile:
-      type: RuntimeDefault
+🛠️ Technology Stack
+----------------------------------------------------------------------------------------------------
+ Category                 Technology
+ ───────────────────────  ──────────────────────────────────────────────────────────────────────────
+ ☁️ Cloud Platform         AWS (Amazon EKS, IAM, ECR, KMS, Secrets Manager)
+ ☸️ Orchestration          Kubernetes
+ 🛡️ Policy as Code        Kyverno, Kubernetes Pod Security Admission (PSA)
+ 🌐 Networking & eBPF     Cilium, Hubble Network Visibility
+ 🚨 Runtime Detection     Falco, FalcoSidekick
+ 🔍 Vulnerability Scans   Trivy, Checkov
+ 🔏 Supply Chain Security Sigstore Cosign
+ 🔑 Secrets Engine        External Secrets Operator (ESO)
+ 📊 Observability & Alerts Prometheus, Alertmanager, Grafana
+ 🚀 CI/CD Automation      GitHub Actions
+ ⚙️ Infrastructure as Code Terraform
 
-  containers:
-    - name: application
-      image: [123456789012.dkr.ecr.ap-south-1.amazonaws.com/app@sha256:4f5a](https://123456789012.dkr.ecr.ap-south-1.amazonaws.com/app@sha256:4f5a)...
-      securityContext:
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-        capabilities:
-          drop:
-            - ALL
-      volumeMounts:
-        - name: tmp-volume
-          mountPath: /tmp
-      automountServiceAccountToken: false
 
-══════════════════════════════════ 4. CILIUM ZERO-TRUST NETWORK POLICY ════════════════════════════════════════════
+🔐 Layered Security Controls
+----------------------------------------------------------------------------------------------------
+ 1. Supply Chain   ──> Trivy CVE Gate + Cosign KMS Signature
+ 2. Admission      ──> Pod Security Admission (Restricted) + Kyverno Validation
+ 3. Workload       ──> Non-Root (UID 10001) + Drop Caps ["ALL"] + Read-Only FS
+ 4. Network        ──> Cilium eBPF Default-Deny + L7 DNS Egress Gate + WireGuard mTLS
+ 5. Runtime        ──> Falco eBPF Real-time Syscall Threat Detection
 
-  --- CILIUM NETWORK POLICY (cilium.io/v2 Default-Deny & L7 DNS Whitelist) ---
+ 📦 1. Supply Chain Security
+   • Automated container vulnerability scanning via Trivy blocking HIGH and CRITICAL CVEs in CI.
+   • Cryptographic artifact signing and attestation with Sigstore Cosign using AWS KMS.
+   • Immutable release tags and vulnerability monitoring on Amazon ECR.
 
-  apiVersion: "cilium.io/v2"
-  kind: CiliumNetworkPolicy
-  metadata:
-    name: backend-microsegmentation
-    namespace: production
-  spec:
-    endpointSelector:
-      matchLabels:
-        app.kubernetes.io/part-of: backend
-    ingress:
-      - fromEndpoints:
-          - matchLabels:
-              app.kubernetes.io/name: ingress-controller
-        toPorts:
-          - ports:
-              - port: "8080"
-                protocol: TCP
-    egress:
-      - toEndpoints:
-          - matchLabels:
-              app.kubernetes.io/name: postgres-database
-        toPorts:
-          - ports:
-              - port: "5432"
-                protocol: TCP
-      - toFQDNs:
-          - matchName: "api.aws.internal"
-        toPorts:
-          - ports:
-              - port: "443"
-                protocol: TCP
+ 🚪 2. Kubernetes Admission Security
+   • Pod Security Admission (PSA): Enforces the Restricted baseline profile across namespaces.
+   • Kyverno Policy Engine: Enforces declarative policy-as-code:
+     - Rejects images without verified Cosign cryptographic signatures.
+     - Blocks image deployments utilizing the mutable :latest tag.
+     - Mandates explicit CPU/Memory resource requests and limits.
+     - Automatically injects seccompProfile: RuntimeDefault.
 
-══════════════════════════════════ 5. COMPLIANCE & BENCHMARK MAPPING ══════════════════════════════════════════════
+ 🔒 3. Workload Hardening
+   • Non-Root Execution: Workloads run under dedicated non-root UID/GID (10001:10001).
+   • Capability Stripping: Linux capabilities dropped (capabilities.drop: ["ALL"]).
+   • Root Filesystem Protection: Read-only root filesystem (readOnlyRootFilesystem: true).
+   • Credential Protection: automountServiceAccountToken: false by default.
 
- ┌──────────────────────────────────┬──────────────────────────────────────┬──────────────┬────────────────────────┐
- │ COMPLIANCE BENCHMARK             │ ARCHITECTURAL IMPLEMENTATION         │ STATUS       │ AUDIT EVIDENCE         │
- ├──────────────────────────────────┼──────────────────────────────────────┼──────────────┼────────────────────────┤
- │ CIS Kubernetes Benchmark v1.8    │ Restricted Pod Security Standards    │ [ PASSED ]   │ Kubelet & Node Audited │
- │ NIST SP 800-190                  │ Container Image Security & Signatures│ [ PASSED ]   │ Trivy + Cosign Gates   │
- │ SOC 2 Type II (Least Privilege)  │ AWS IRSA + Namespace RBAC Isolation  │ [ PASSED ]   │ Zero Static IAM Keys   │
- │ PCI-DSS v4.0 (Requirement 6.4)   │ Cilium eBPF Default-Deny Isolation   │ [ PASSED ]   │ Boundary Microsegment  │
- │ MITRE ATT&CK for Containers      │ Falco eBPF Kernel Threat Monitoring  │ [ PASSED ]   │ Real-time Event Stream │
- └──────────────────────────────────┴──────────────────────────────────────┴──────────────┴────────────────────────┘
+ 🌐 4. Zero-Trust Network Microsegmentation
+   • Default-Deny Posture: Ingress/egress blocked unless explicitly allowed via CiliumNetworkPolicy.
+   • L7 Protocol Security: Fine-grained HTTP/gRPC routing rules.
+   • Egress Filtering: DNS-aware egress whitelist allowing access only to approved external FQDNs.
+   • Data in Transit: Automated node-to-node encryption via transparent WireGuard mTLS.
 
-══════════════════════════════════ 6. INCIDENT RESPONSE & REMEDIATION ═════════════════════════════════════════════
+ 🚨 5. Runtime Threat Detection
+   • Falco Kernel Probing: Inspects Linux kernel system calls via eBPF probes.
+   • Threat Signatures Monitored:
+     - Interactive shell execution inside containers (/bin/sh, /bin/bash).
+     - Unauthorized modifications to system directories (/etc, /bin, /usr).
+     - Sensitive credential file access (/var/run/secrets/kubernetes.io).
+     - Outbound connections to unauthorized IP ranges.
 
-                 ┌────────────────────────────────────────────────────────────┐
-                 │     THREAT DETECTED: Terminal Spawned Inside Pod           │
-                 │   (Falco Alert: Notice - Terminal shell in container)      │
-                 └─────────────────────────────┬──────────────────────────────┘
-                                               │
-                                               ▼
-                 ┌────────────────────────────────────────────────────────────┐
-                 │    FalcoSidekick Routes High-Priority Alert to Webhook     │
-                 └─────────────────────────────┬──────────────────────────────┘
-                                               │
-                         ┌─────────────────────┴─────────────────────┐
-                         ▼                                           ▼
-           ┌───────────────────────────┐               ┌───────────────────────────┐
-           │      SECOPS ALERTING      │               │   AUTOMATED CONTAINMENT   │
-           ├───────────────────────────┤               ├───────────────────────────┤
-           │ • PagerDuty High Severity │               │ • Cilium Quarantines Pod  │
-           │ • Slack #secops-critical  │               │ • Pod Evicted & Terminated│
-           │ • CloudWatch Audit Logs   │               │ • Forensics Snapshot Dump │
-           └───────────────────────────┘               └───────────────────────────┘
 
-════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
- [ ARCHITECTURE STATUS : FULL ZERO-TRUST ENFORCEMENT • INCIDENT RESPONSE: OPERATIONAL • TIERS: 5/5 HARDENED ]
-════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-```
+📊 Security Benchmark & Compliance Mapping
+----------------------------------------------------------------------------------------------------
+ Standard / Benchmark     Architectural Implementation                           Validation Status
+ ───────────────────────  ─────────────────────────────────────────────────────  ───────────────────
+ 📋 CIS EKS Benchmark     Hardened node configuration, restricted kubelet API    Compliant
+ 🛡️ NIST SP 800-190       Container image vulnerability gates & signatures       Compliant
+ 🔒 SOC 2 Type II         Least privilege via AWS IRSA, namespace RBAC           Compliant
+ 💳 PCI-DSS v4.0 (§6.4)   Cilium eBPF network microsegmentation & default-deny   Compliant
+ 🎯 MITRE ATT&CK          Falco eBPF behavioral threat detection and alerts      Compliant
+
+
+🚨 Incident Response & Automated Containment
+----------------------------------------------------------------------------------------------------
+ Threat Detected (Falco / Kyverno Alert)
+                   │
+                   ▼
+  FalcoSidekick Event Dispatcher
+                   │
+         ┌─────────┴─────────┐
+         ▼                   ▼
+  SecOps Notification   Automated Containment
+  (Slack / PagerDuty)   (Cilium Network Isolation)
+         │                   │
+         ▼                   ▼
+  SRE Investigation    Pod Eviction & Forensics
+====================================================================================================

@@ -1,0 +1,26 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-approved-image-registry
+  annotations:
+    policies.kyverno.io/title: Require Approved Image Registry
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Container images must come from approved registries.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: validate-image-registry
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: "Images must come from an approved registry."
+        foreach:
+          - list: "request.object.spec.containers"
+            pattern:
+              image: "ghcr.io/MahendarSura/*"

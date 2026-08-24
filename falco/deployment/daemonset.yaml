@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: falco
+  namespace: security-platform
+  labels:
+    app: falco
+spec:
+  selector:
+    matchLabels:
+      app: falco
+  template:
+    metadata:
+      labels:
+        app: falco
+    spec:
+      serviceAccountName: falco
+
+      containers:
+        - name: falco
+          image: falcosecurity/falco:0.42.1
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            privileged: true
+
+          args:
+            - /usr/bin/falco
+            - --cri=/run/containerd/containerd.sock
+            - --modern-bpf
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          volumeMounts:
+            - name: containerd-socket
+              mountPath: /run/containerd/containerd.sock
+
+            - name: host-proc
+              mountPath: /host/proc
+              readOnly: true
+
+            - name: host-etc
+              mountPath: /host/etc
+              readOnly: true
+
+            - name: falco-config
+              mountPath: /etc/falco
+
+      volumes:
+        - name: containerd-socket
+          hostPath:
+            path: /run/containerd/containerd.sock
+
+        - name: host-proc
+          hostPath:
+            path: /proc
+
+        - name: host-etc
+          hostPath:
+            path: /etc
+
+        - name: falco-config
+          configMap:
+            name: falco-config

@@ -1,0 +1,18 @@
+scan:
+  scanners:
+    - vuln
+    - misconfig
+    - secret
+
+severity:
+  - CRITICAL
+  - HIGH
+  - MEDIUM
+
+ignore-unfixed: true
+
+exit-code: 1
+
+format: table
+
+timeout: 10m0s

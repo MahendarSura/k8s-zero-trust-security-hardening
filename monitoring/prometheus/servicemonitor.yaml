@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: secure-app
+  namespace: security-platform
+spec:
+  selector:
+    matchLabels:
+      app: secure-app
+  endpoints:
+    - port: metrics
+      interval: 30s

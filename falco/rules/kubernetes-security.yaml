@@ -1,0 +1,35 @@
+- rule: Terminal Shell Spawned in Container
+  desc: Detect shell execution inside a Kubernetes container
+  condition: >
+    spawned_process
+    and container
+    and proc.name in (bash, sh, zsh, ash)
+  output: >
+    Shell spawned inside container
+    (user=%user.name container=%container.name
+     namespace=%k8s.ns.name pod=%k8s.pod.name
+     command=%proc.cmdline)
+  priority: WARNING
+  tags:
+    - container
+    - kubernetes
+    - runtime
+    - security
+
+- rule: Write Below Sensitive Kubernetes Path
+  desc: Detect writes to sensitive Kubernetes paths from containers
+  condition: >
+    open_write
+    and container
+    and fd.name startswith /etc/kubernetes
+  output: >
+    Sensitive Kubernetes path modified
+    (user=%user.name container=%container.name
+     namespace=%k8s.ns.name pod=%k8s.pod.name
+     file=%fd.name)
+  priority: ERROR
+  tags:
+    - container
+    - kubernetes
+    - filesystem
+    - runtime

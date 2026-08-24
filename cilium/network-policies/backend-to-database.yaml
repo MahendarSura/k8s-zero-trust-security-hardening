@@ -1,0 +1,17 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: backend-to-database
+  namespace: secure-app
+spec:
+  endpointSelector:
+    matchLabels:
+      app: database
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            app: backend
+      toPorts:
+        - ports:
+            - port: "3306"
+              protocol: TCP

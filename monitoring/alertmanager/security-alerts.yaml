@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: security-platform-alerts
+  namespace: security-platform
+spec:
+  groups:
+    - name: security-platform
+      rules:
+        - alert: KubernetesPodCrashLooping
+          expr: increase(kube_pod_container_status_restarts_total[10m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Kubernetes pod is restarting repeatedly
+            description: A Kubernetes workload has restarted multiple times within 10 minutes.

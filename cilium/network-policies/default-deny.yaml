@@ -1,0 +1,7 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: default-deny-secure-app
+  namespace: secure-app
+spec:
+  endpointSelector: {}

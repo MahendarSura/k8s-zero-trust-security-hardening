@@ -1,0 +1,22 @@
+json_output: true
+
+log_level: info
+
+priority: warning
+
+stdout_output:
+  enabled: true
+
+syslog_output:
+  enabled: false
+
+file_output:
+  enabled: true
+  keep_alive: false
+  filename: /var/log/falco/events.log
+
+program_output:
+  enabled: false
+
+http_output:
+  enabled: false
